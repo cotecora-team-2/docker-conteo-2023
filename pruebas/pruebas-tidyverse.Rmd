@@ -1,0 +1,33 @@
+---
+title: "Pruebas R"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(cmdstanr)
+x <- rnorm(1000, 0, 1)
+```
+
+Gráficas:
+
+```{r}
+ggplot(tibble(x = x), aes(x = x)) + geom_histogram()
+```
+
+```{r}
+file <- file.path(cmdstan_path(), "examples/bernoulli/bernoulli.stan")
+mod <- cmdstan_model(file)
+mod$print()
+# Data as a named list (like RStan)
+stan_data <- list(N = 10, y = c(0,1,0,0,0,0,0,0,0,1))
+# Run MCMC using the 'sample' method
+fit_mcmc <- mod$sample(
+  data = stan_data,
+  seed = 123,
+  chains = 2,
+  parallel_chains = 2
+)
+# Use 'posterior' package for summaries
+fit_mcmc$summary()
+```
